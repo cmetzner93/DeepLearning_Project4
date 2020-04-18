@@ -179,12 +179,12 @@ def main(argv=None):
         # build model
         model = Sequential()
         model.add(SimpleRNN(hidden_state, input_dim=vocab_size))
-        model.add(Dropout(0.2))
         model.add(Dense(vocab_size, activation='softmax'))
         print(model.summary())
 
         # train model
-        train_model(model, X, y, n_epochs=50, learning_rate=0.001, model_name='rnn_%d' % (int(argv[3])))
+        train_model(model, X, y, n_epochs=50, learning_rate=0.001,
+                    model_name='rnn_%d_%d_%d' % (int(argv[3]), int(argv[4]), int(argv[5])))
 
     elif argv[2] == 'rnn_multi':
         model = Sequential()
@@ -196,19 +196,20 @@ def main(argv=None):
         print(model.summary())
 
         # train model
-        train_model(model, X, y, n_epochs=50, learning_rate=0.001, model_name='rnn_multi_%d' % (int(argv[3])))
+        train_model(model, X, y, n_epochs=50, learning_rate=0.001,
+                    model_name='rnn_multi_%d_%d_%d' % (int(argv[3]), int(argv[4]), int(argv[5])))
 
     # build and train lstm
     elif argv[2] == 'lstm':
         # build model
         model = Sequential()
         model.add(LSTM(hidden_state, input_shape=(X.shape[1], X.shape[2])))
-        model.add(Dropout(0.5))
         model.add(Dense(vocab_size, activation='softmax'))
         print(model.summary())
 
         # train model
-        train_model(model, X, y, n_epochs=50, learning_rate=0.001, model_name='lstm_%d' %(int(argv[3])))
+        train_model(model, X, y, n_epochs=50, learning_rate=0.001,
+                    model_name='lstm_%d_%d_%d' % (int(argv[3]), int(argv[4]), int(argv[5])))
 
     elif argv[2] == 'lstm_multi':
         model = Sequential()
@@ -220,7 +221,8 @@ def main(argv=None):
         print(model.summary())
 
         # train model
-        train_model(model, X, y, n_epochs=50, learning_rate=0.001, model_name='lstm_multi_%d' % (int(argv[3])))
+        train_model(model, X, y, n_epochs=50, learning_rate=0.001,
+                    model_name='lstm_multi_%d_%d_%d' % (int(argv[3]), int(argv[4]), int(argv[5])))
 
 
 if __name__ == '__main__':
