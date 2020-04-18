@@ -2,9 +2,8 @@ import sys
 import numpy as np
 from tensorflow import keras
 from keras.utils import to_categorical
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM, SimpleRNN
+from keras.models import Sequential, load_model
+from keras.layers import LSTM, SimpleRNN, Dense, Dropout
 from keras.preprocessing.sequence import pad_sequences
 from pickle import dump, load
 import matplotlib.pyplot as plt
@@ -128,7 +127,7 @@ def train_model(model, X, y, n_epochs, learning_rate, model_name):
 
     # get list of 3 random sequences from training data which will be used to
     # generate/predict characters during training
-    random_indexes = list(np.random.randint(low=0, high=len(lines), size=3))
+    random_indexes = list(np.random.randint(low=0, high=len(lines) - X.shape[1] - 1, size=3))
     random_sequences = [lines[index][:-1] for index in random_indexes]
 
     # compile model
@@ -160,7 +159,6 @@ def epoch_loss_plot(history_dict, model_name):
     plt.savefig('plots/epoch_loss_%s.png' %(model_name))
 
 
-
 # Driver code main()
 def main(argv=None):
     file = argv[1]
@@ -181,26 +179,49 @@ def main(argv=None):
         # build model
         model = Sequential()
         model.add(SimpleRNN(hidden_state, input_dim=vocab_size))
+        model.add(Dropout(0.2))
         model.add(Dense(vocab_size, activation='softmax'))
         print(model.summary())
 
         # train model
-        train_model(model, X, y, n_epochs=50, learning_rate=0.01, model_name='rnn_%d' % (int(argv[3])))
+        train_model(model, X, y, n_epochs=50, learning_rate=0.001, model_name='rnn_%d' % (int(argv[3])))
 
+    elif argv[2] == 'rnn_multi':
+        model = Sequential()
+        model.add(SimpleRNN(hidden_state, input_dim=vocab_size, return_sequences=True))
+        model.add(Dropout(0.2))
+        model.add(SimpleRNN(hidden_state))
+        model.add(Dropout(0.2))
+        model.add(Dense(y.shape[1], activation='softmax'))
+        print(model.summary())
+
+        # train model
+        train_model(model, X, y, n_epochs=50, learning_rate=0.001, model_name='rnn_multi_%d' % (int(argv[3])))
 
     # build and train lstm
-    if argv[2] == 'lstm':
+    elif argv[2] == 'lstm':
         # build model
         model = Sequential()
         model.add(LSTM(hidden_state, input_shape=(X.shape[1], X.shape[2])))
+        model.add(Dropout(0.5))
         model.add(Dense(vocab_size, activation='softmax'))
         print(model.summary())
 
         # train model
-        train_model(model, X, y, n_epochs=50, learning_rate=0.01, model_name='lstm_%d' %(int(argv[3])))
+        train_model(model, X, y, n_epochs=50, learning_rate=0.001, model_name='lstm_%d' %(int(argv[3])))
+
+    elif argv[2] == 'lstm_multi':
+        model = Sequential()
+        model.add(LSTM(hidden_state, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
+        model.add(Dropout(0.2))
+        model.add(LSTM(hidden_state))
+        model.add(Dropout(0.2))
+        model.add(Dense(vocab_size, activation='softmax'))
+        print(model.summary())
+
+        # train model
+        train_model(model, X, y, n_epochs=50, learning_rate=0.001, model_name='lstm_multi_%d' % (int(argv[3])))
 
 
 if __name__ == '__main__':
     main(sys.argv)
-
-
